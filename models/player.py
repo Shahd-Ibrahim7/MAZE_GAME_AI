@@ -1,30 +1,37 @@
 # models/player.py
 import pygame
-from core.settings import TILE_SIZE, PLAYER_COLOR
+from core.settings import TILE_SIZE
 
 class Player:
     def __init__(self, x, y):
-        # الإحداثيات هنا بالـ Grid (مثلاً الصف 1، العمود 1)
         self.x = x
         self.y = y
 
-    def move(self, dx, dy, maze_grid):
-        # حساب المكان الجديد المتوقع للاعب
-        new_x = self.x + dx
-        # الـ dx والـ dy هما اتجاه الحركة (مثلاً يمين يبقى dx=1, dy=0)
-        new_y = self.y + dy
-
-        # الـ Collision Detection (منع اختراق الحوائط):
-        # نتأكد إن المربع الجديد مش حيطة (يعني قيمته في الـ grid مش بتساوي 1)
-        if maze_grid[new_y][new_x] != 1:
-            self.x = new_x
-            self.y = new_y
+    def move(self, dx, dy, grid):
+        # التحقق من أن الحركة داخل المتاهة وليست في حيطة
+        if 0 <= self.x + dx < len(grid[0]) and 0 <= self.y + dy < len(grid):
+            if grid[self.y + dy][self.x + dx] == 0:
+                self.x += dx
+                self.y += dy
 
     def draw(self, screen):
-        # تحويل إحداثيات الـ Grid لبكسل عشان نرسم على الشاشة
-        pixel_x = self.x * TILE_SIZE
-        pixel_y = self.y * TILE_SIZE
+        # حساب إحداثيات مركز المربع
+        cx = self.x * TILE_SIZE + TILE_SIZE // 2
+        cy = self.y * TILE_SIZE + TILE_SIZE // 2
+        radius = TILE_SIZE // 2 - 4
+
+        # رسم جسم الفار (رمادي فاتح مودرن)
+        pygame.draw.circle(screen, (149, 165, 166), (cx, cy), radius)
         
-        # رسم اللاعب كمربع ملون (قدام نقدر نغيره بصورة)
-        rect = pygame.Rect(pixel_x, pixel_y, TILE_SIZE, TILE_SIZE)
-        pygame.draw.rect(screen, PLAYER_COLOR, rect)
+        # رسم الأذان اللطيفة (وردي / رمادي)
+        pygame.draw.circle(screen, (127, 140, 141), (cx - 6, cy - 8), 5)
+        pygame.draw.circle(screen, (127, 140, 141), (cx + 6, cy - 8), 5)
+        pygame.draw.circle(screen, (241, 148, 180), (cx - 6, cy - 8), 2) # داخل الأذن
+        pygame.draw.circle(screen, (241, 148, 180), (cx + 6, cy - 8), 2)
+
+        # رسم العينين (نقاط سوداء صغيرة)
+        pygame.draw.circle(screen, (44, 62, 80), (cx - 4, cy - 2), 2)
+        pygame.draw.circle(screen, (44, 62, 80), (cx + 4, cy - 2), 2)
+
+        # الأنف (نقطة وردي صغيرة في المركز)
+        pygame.draw.circle(screen, (231, 76, 60), (cx, cy + 3), 3)
